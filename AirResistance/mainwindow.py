@@ -9,7 +9,7 @@ from math import pi
 def calculateData(window):
     mass = 0.325
     start = 0
-    end = 10
+    end = 30
     intervalFactor = 100
     interval = 1/intervalFactor
 
@@ -23,7 +23,7 @@ def calculateData(window):
 
     for t in range(start * intervalFactor, end * intervalFactor + 1):
         realT = t * interval
-        dF = (window.CDSlider.value()/100) * (window.DSlider.value()/1000) * pi * (window.radiusSlider.value()/1000)**2* (velocity**2)
+        dF = 0.5 * (window.CDSlider.value()/100) * (window.DSlider.value()/1000) * pi * (window.radiusSlider.value()/1000)**2 * (velocity**2)
         aF = mass * -9.81
 
         tF = dF + aF
