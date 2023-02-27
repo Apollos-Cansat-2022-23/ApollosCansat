@@ -1,7 +1,9 @@
 import adafruit_lis3dh
 import adafruit_rfm9x
+import adafruit_dht
 import board
 import digitalio
+import analogio
 
 import deviceCommunication
 import adafruit_bmp280
@@ -32,7 +34,7 @@ class BMP280:
         try:
             temperature, pressure, altitude = self.sensor.temperature, self.sensor.pressure, self.sensor.altitude
 
-        except OSError:
+        except:
             temperature, pressure, altitude = -1, -1, -1
 
         return temperature, pressure, altitude
@@ -89,6 +91,43 @@ class Accelerometer:
         self.lis3dh.range = 3
 
     def read(self):
-        return [
-            value / adafruit_lis3dh.STANDARD_GRAVITY for value in self.lis3dh.acceleration
-        ]
+        try:
+            return [
+                value / adafruit_lis3dh.STANDARD_GRAVITY for value in self.lis3dh.acceleration
+            ]
+
+        except:
+            return [-1, -1, -1]
+
+
+class DHT11:
+    def __init__(self):
+        self.sensor = adafruit_dht.DHT11(board.GP8)
+
+    def read(self):
+        try:
+            temperature, humidity = self.sensor.temperature, self.sensor.humidity
+
+        except:
+            temperature, humidity = -1, -1
+
+        return temperature, humidity
+
+
+class MQ7:
+    def __init__(self):
+        self.MQ7adc = analogio.AnalogIn(board.A1)
+        self.MQ7In = digitalio.DigitalInOut(board.GP9)
+        self.MQ7In.direction = digitalio.Direction.INPUT
+
+    def read(self):
+        return int(self.MQ7In.value), self.MQ7adc.value * 3.3 / 65535
+
+
+class O2:
+    def __init__(self):
+        self.O2adc = analogio.AnalogIn(board.A0)
+
+    def read(self):
+        return (1 - self.O2adc.value/65535) * 25
+
