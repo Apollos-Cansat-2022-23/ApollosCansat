@@ -1,3 +1,5 @@
+import os
+
 import adafruit_lis3dh
 import adafruit_rfm9x
 import adafruit_dht
@@ -8,6 +10,8 @@ import analogio
 import deviceCommunication
 import adafruit_bmp280
 import adafruit_lis3dh
+import adafruit_sdcard
+import storage
 
 
 class BMP280:
@@ -131,3 +135,41 @@ class O2:
     def read(self):
         return (1 - self.O2adc.value/65535) * 25
 
+
+class SD:
+    def __init__(self):
+        spi = deviceCommunication.GetSPI()
+        cs = digitalio.DigitalInOut(board.GP10)
+        sdcard = adafruit_sdcard.SDCard(spi, cs)
+        vfs = storage.VfsFat(sdcard)
+        storage.mount(vfs, "/sd")
+        print("SD Card Ready")
+
+        '''with open("/sd/17.txt", "r") as f:
+            for line in f.readlines():
+                print(line)
+        '''
+
+        for file in os.listdir("/sd"):
+            if "id.txt" in file:
+                break
+        else:
+            with open("/sd/id.txt", "w+") as f:
+                f.write("0")
+
+        self.id = 0
+        # Can Error and if error, I will know.
+        with open("/sd/id.txt", "r") as f:
+            self.id = int(f.readline().strip()) + 1
+            with open("/sd/id.txt", "w+") as f2:
+                f2.write(str(self.id))
+            print(f"Id is {self.id}")
+
+        #self.file = open(f"/sd/{id}.txt", "a+")
+
+    def write(self, content):
+        with open(f"/sd/{self.id}.txt", "a+") as f:
+            f.write(content + "\n")
+
+    def __del__(self):
+        self.file.close()
